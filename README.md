@@ -35,17 +35,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 %matplotlib inline
 import seaborn as sns
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.cross_validation import cross_val_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.metrics import accuracy_score
 ```
-
-    /anaconda3/lib/python3.6/site-packages/sklearn/cross_validation.py:41: DeprecationWarning: This module was deprecated in version 0.18 in favor of the model_selection module into which all the refactored classes and functions are moved. Also note that the interface of the new CV iterators are different from that of this module. This module will be removed in 0.20.
-      "This module will be removed in 0.20.", DeprecationWarning)
-
 
 Now that we've imported all the necessary libraries and frameworks for this lab, we'll need to get the dataset.  
 
@@ -518,7 +513,7 @@ mean_dt_cv_score = np.mean(dt_cv_score)
 print("Mean Cross Validation Score: {:.4}%".format(mean_dt_cv_score * 100))
 ```
 
-    Mean Cross Validation Score: 45.53%
+    Mean Cross Validation Score: 47.16%
 
 
 ## Grid Search: Decision Trees
@@ -591,17 +586,21 @@ dt_grid_search = GridSearchCV(dt_clf, dt_param_grid, cv=3, return_train_score=Tr
 dt_grid_search.fit(scaled_df, labels)
 ```
 
+    /Users/forest.polchow/anaconda3/lib/python3.6/site-packages/sklearn/model_selection/_search.py:841: DeprecationWarning: The default of the `iid` parameter will change from True to False in version 0.22 and will be removed in 0.24. This will change numeric results when test-set sizes are unequal.
+      DeprecationWarning)
 
 
 
-    GridSearchCV(cv=3, error_score='raise',
+
+
+    GridSearchCV(cv=3, error_score='raise-deprecating',
            estimator=DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=None,
                 max_features=None, max_leaf_nodes=None,
                 min_impurity_decrease=0.0, min_impurity_split=None,
                 min_samples_leaf=1, min_samples_split=2,
                 min_weight_fraction_leaf=0.0, presort=False, random_state=None,
                 splitter='best'),
-           fit_params=None, iid=True, n_jobs=1,
+           fit_params=None, iid='warn', n_jobs=None,
            param_grid={'criterion': ['gini', 'entropy'], 'max_depth': [None, 2, 3, 4, 5, 6], 'min_samples_split': [2, 5, 10], 'min_samples_leaf': [1, 2, 3, 4, 5, 6]},
            pre_dispatch='2*n_jobs', refit=True, return_train_score=True,
            scoring=None, verbose=0)
@@ -642,7 +641,7 @@ dt_grid_search.best_params_
     {'criterion': 'gini',
      'max_depth': 5,
      'min_samples_leaf': 6,
-     'min_samples_split': 10}
+     'min_samples_split': 2}
 
 
 
@@ -668,7 +667,15 @@ mean_rf_cv_score = np.mean(cross_val_score(rf_clf, scaled_df, labels, cv=3))
 print("Mean Cross Validation Score for Random Forest Classifier: {:.4}%".format(mean_rf_cv_score * 100))
 ```
 
-    Mean Cross Validation Score for Random Forest Classifier: 55.36%
+    Mean Cross Validation Score for Random Forest Classifier: 53.67%
+
+
+    /Users/forest.polchow/anaconda3/lib/python3.6/site-packages/sklearn/ensemble/forest.py:246: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+      "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+    /Users/forest.polchow/anaconda3/lib/python3.6/site-packages/sklearn/ensemble/forest.py:246: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+      "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+    /Users/forest.polchow/anaconda3/lib/python3.6/site-packages/sklearn/ensemble/forest.py:246: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+      "10 in version 0.20 to 100 in 0.22.", FutureWarning)
 
 
 Now that we have our baseline score, we'll create a parameter grid specific to our Random Forest Classifier.  
@@ -721,10 +728,14 @@ print("")
 print("Optimal Parameters: {}".format(rf_grid_search.best_params_))
 ```
 
-    Testing Accuracy: 58.97%
-    Total Runtime for Grid Search on Random Forest Classifier: 36.1 seconds
+    Testing Accuracy: 58.91%
+    Total Runtime for Grid Search on Random Forest Classifier: 35.06 seconds
     
-    Optimal Parameters: {'criterion': 'gini', 'max_depth': None, 'min_samples_leaf': 5, 'min_samples_split': 10, 'n_estimators': 100}
+    Optimal Parameters: {'criterion': 'entropy', 'max_depth': 6, 'min_samples_leaf': 5, 'min_samples_split': 20, 'n_estimators': 30}
+
+
+    /Users/forest.polchow/anaconda3/lib/python3.6/site-packages/sklearn/model_selection/_search.py:841: DeprecationWarning: The default of the `iid` parameter will change from True to False in version 0.22 and will be removed in 0.24. This will change numeric results when test-set sizes are unequal.
+      DeprecationWarning)
 
 
 ### Interpreting Our Results
@@ -782,12 +793,6 @@ print("Total Runtime for Grid Search on AdaBoost: {:.4} seconds".format(time.tim
 print("")
 print("Optimal Parameters: {}".format(adaboost_grid_search.best_params_))
 ```
-
-    Testing Accuracy: 56.6%
-    Total Runtime for Grid Search on AdaBoost: 49.89 seconds
-    
-    Optimal Parameters: {'learning_rate': 0.1, 'n_estimators': 100}
-
 
 ## Summary
 
